@@ -1,4 +1,5 @@
-import {Users} from "../models/";
+import { Users } from "../models/";
+import bcryptjs from 'bcryptjs';
 
 //1. Completar la logica para manejar el inicio de sesión
 // - responder con un codigo de estado 401 cuando las credenciales sean incorrectas
@@ -12,6 +13,33 @@ export const login = async (req, res) => {
 // - responder con un codigo de estado fallido 400 > cuando hagan falta campos o cuando el usuario ya exista en la base de datos
 // - responder con el objeto del usuario que ha sido creado y un codigo 201 cuando el registro sea satisfactorio
 export const signIn = async (req, res) => {
-    
-}
+   try{
+      const { firstName, lastName, email, password } = req.body;
 
+      //* Se valida que no hagan falta campos
+      if(!firstName || !lastName || !email || !password){
+         return res.status(400).json({message: "Registro fallido al hacer falta uno o más campos"})
+      } else{
+
+         //* Se encripta la contraseña
+         const encryptedPassword = bcryptjs.hashSync(password, 10);
+         req.body.password = encryptedPassword;
+
+         const [user, created] = await Users.findOrCreate({
+            where: { email: email },
+            defaults: req.body
+         });
+
+         //* Se valida si el usuario ya existía y por lo tanto no fue creado
+         if(!created){
+            return res.status(400).json({message: "Registro fallido al agregar un usuario con correo ya existente"})
+         } else{
+
+            //* El usuario ha sido registrado exitosamente
+            return res.status(201).json(user);
+         }
+      }
+   }catch(error){
+      console.log(error);
+   }
+}

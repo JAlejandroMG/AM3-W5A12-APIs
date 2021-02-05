@@ -102,7 +102,7 @@ describe("Acceso a rutas protegidas | Autorización | (Opcional)", () => {
         expect(typeof results.body).toBe('array');
         expect(results.body).toEqual(
             expect.arrayContaining([
-              expect.objectContaining(user),
+                expect.objectContaining(user),
             ])
         );
     });
