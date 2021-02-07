@@ -21,9 +21,9 @@ export const login = async (req, res) => {
             token
          })
       }
-      return res.status(401).json({message: "El usuario y/o la contraseña son incorrectas"})
+      return res.status(401).json({ message: "El usuario y/o la contraseña son incorrectas" })
    }
-   return res.status(401).json({message: "El usuario y/o la contraseña son incorrectas"})
+   return res.status(401).json({ message: "El usuario y/o la contraseña son incorrectas" })
 }
 
 
@@ -45,22 +45,24 @@ export const signIn = async (req, res) => {
          const encryptedPassword = bcryptjs.hashSync(password, 10);
          req.body.password = encryptedPassword;
 
-         let [user, created] = await Users.findOrCreate({
-            where: { email: email },
+         //* Regresa el objeto user, y si no existía, regresa created con valor true
+         let [ user, created ] = await Users.findOrCreate({
+            where: { email },
             defaults: req.body
          });
 
          //* Se valida si el usuario ya existía y por lo tanto no fue creado
          if(!created){
-            return res.status(400).json({message: "Registro fallido al agregar un usuario con correo ya existente"})
+            return res.status(400).json({ message: "Registro fallido al agregar un usuario con correo ya existente" })
          } else{
 
             //* El usuario ha sido registrado exitosamente
+            const { id, firstName, lastName, email } = user;
             user= {
-               id: user.id,
-               firstName: user.firstName,
-               lastName: user.lastName,
-               email: user.email
+               id,
+               firstName,
+               lastName,
+               email
             }
             return res.status(201).json(user);
          }
