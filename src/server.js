@@ -9,5 +9,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log("Servidor escuchando sobre el puerto", PORT);
+    console.log(`Servidor escuchando sobre el puerto ${PORT}`);
 });
