@@ -11,9 +11,15 @@ import { generateJWT } from '../middlewares/jwt';
 
 export const login = async (req, res) => {
    const { email, password } = req.body;
-   const results = await Users.findOne({where: {email}});
+
+   //* Se valida si el correo electrónico del ususario está registrado
+   const results = await Users.findOne({ where: { email } });
+
+   //* Si el usuario existe se valida su contraseña
    if(results) {
       const valid = bcryptjs.compareSync(password, results.password);
+
+      //*Si la contraseña es válida el usuario inicia sesión
       if(valid){
          const token = generateJWT(results);
          return res.status(200).json({
@@ -21,8 +27,12 @@ export const login = async (req, res) => {
             token
          })
       }
+
+      //* La contraseña del usuario no es correcta
       return res.status(401).json({ message: "El usuario y/o la contraseña son incorrectas" })
    }
+
+   //* El correo del usuario no está registrado
    return res.status(401).json({ message: "El usuario y/o la contraseña son incorrectas" })
 }
 
@@ -38,14 +48,16 @@ export const signIn = async (req, res) => {
 
       //* Se valida que no hagan falta campos
       if(!firstName || !lastName || !email || !password){
-         return res.status(400).json({message: "Registro fallido al hacer falta uno o más campos"})
-      } else{
 
-         //* Se encripta la contraseña
+         //* Por lo menos un campo está vacío
+         return res.status(400).json({message: "Registro fallido al hacer falta uno o más campos"})
+
+      //* Se encripta la contraseña
+      } else{
          const encryptedPassword = bcryptjs.hashSync(password, 10);
          req.body.password = encryptedPassword;
 
-         //* Regresa el objeto user, y si no existía, regresa created con valor true
+         //* Se regresa el objeto user, y si no existía, se regresa created con valor true
          let [ user, created ] = await Users.findOrCreate({
             where: { email },
             defaults: req.body
@@ -53,10 +65,12 @@ export const signIn = async (req, res) => {
 
          //* Se valida si el usuario ya existía y por lo tanto no fue creado
          if(!created){
-            return res.status(400).json({ message: "Registro fallido al agregar un usuario con correo ya existente" })
-         } else{
 
-            //* El usuario ha sido registrado exitosamente
+            //* El correo del usuario ya estaba registrado
+            return res.status(400).json({ message: "Registro fallido al agregar un usuario con correo ya existente" })
+
+         //* El usuario ha sido registrado exitosamente
+         } else{
             const { id, firstName, lastName, email } = user;
             user= {
                id,
