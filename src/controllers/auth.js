@@ -10,31 +10,36 @@ import { generateJWT } from '../middlewares/jwt';
 // - responder con el token jwt (token)
 
 export const login = async (req, res) => {
-   const { email, password } = req.body;
+   try{
+      const { email, password } = req.body;
 
-   //* Se valida si el correo electrónico del ususario está registrado
-   const results = await Users.findOne({ where: { email } });
+      //* Se valida si el correo electrónico del ususario está registrado
+      const results = await Users.findOne({ where: { email } });
 
-   //* Si el usuario existe se valida su contraseña
-   if(results) {
-      const valid = bcryptjs.compareSync(password, results.password);
+      //* Si el usuario existe se valida su contraseña
+      if(results) {
+         const valid = bcryptjs.compareSync(password, results.password);
 
-      //*Si la contraseña es válida el usuario inicia sesión
-      if(valid){
-         const token = generateJWT(results);
-         return res.status(200).json({
-            message: "Has iniciado sesión exitosamente",
-            token
-         })
-      }
+         //*Si la contraseña es válida el usuario inicia sesión
+         if(valid){
+            const token = generateJWT(results);
+            return res.status(200).json({
+               message: "Has iniciado sesión exitosamente",
+               token
+            });
+         };
 
-      //* La contraseña del usuario no es correcta
-      return res.status(401).json({ message: "El usuario y/o la contraseña son incorrectas" })
-   }
+         //* La contraseña del usuario no es correcta
+         return res.status(401).json({ message: "El usuario y/o la contraseña son incorrectas" })
+      };
 
-   //* El correo del usuario no está registrado
-   return res.status(401).json({ message: "El usuario y/o la contraseña son incorrectas" })
-}
+      //* El correo del usuario no está registrado
+      return res.status(401).json({ message: "El usuario y/o la contraseña son incorrectas" });
+
+   }catch(error){
+      console.log(error);
+   };
+};
 
 
 
@@ -50,7 +55,7 @@ export const signIn = async (req, res) => {
       if(!firstName || !lastName || !email || !password){
 
          //* Por lo menos un campo está vacío
-         return res.status(400).json({message: "Registro fallido al hacer falta uno o más campos"})
+         return res.status(400).json({message: "Registro fallido al hacer falta uno o más campos"});
 
       //* Se encripta la contraseña
       } else{
@@ -67,7 +72,7 @@ export const signIn = async (req, res) => {
          if(!created){
 
             //* El correo del usuario ya estaba registrado
-            return res.status(400).json({ message: "Registro fallido al agregar un usuario con correo ya existente" })
+            return res.status(400).json({ message: "Registro fallido al agregar un usuario con correo ya existente" });
 
          //* El usuario ha sido registrado exitosamente
          } else{
@@ -77,11 +82,11 @@ export const signIn = async (req, res) => {
                firstName,
                lastName,
                email
-            }
+            };
             return res.status(201).json(user);
-         }
-      }
+         };
+      };
    }catch(error){
       console.log(error);
-   }
-}
+   };
+};
